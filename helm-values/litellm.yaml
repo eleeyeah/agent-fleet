@@ -82,6 +82,14 @@ resources:
 
 migrationJob:
   enabled: true
+  # Do not use an Argo PreSync hook. A failed/deleted hook leaves the app
+  # permanently "waiting for Job" and skips auto-sync. Run migrations as a
+  # normal Job alongside the Deployment.
+  hooks:
+    argocd:
+      enabled: false
+    helm:
+      enabled: false
   # LimitRange in fleet-core defaults unspecified containers to 512Mi. Prisma
   # inside the LiteLLM image OOMs at that size (the Job was OOMKilled).
   resources:

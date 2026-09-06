@@ -132,3 +132,9 @@ After the first PR, check the exact status-check context Gitea reports on the PR
   in the registry yet (`./scripts/build-images.sh`) or containerd trust isn't configured.
 - `bootstrap.sh` is idempotent: it skips anything that already exists; re-running it
   after a partial failure is the intended recovery path.
+- LiteLLM migrations are a normal Job (`migrationJob.hooks.argocd.enabled: false`).
+  Do not make them a PreSync hook: a failed/deleted hook leaves the app stuck on
+  "waiting for completion of hook" and Argo skips auto-sync. If that happens:
+  `kubectl patch application fleet-litellm-local -n argocd --type json -p '[{"op":"remove","path":"/operation"}]'`
+  then sync again after pushing a fix. If the Job is `OOMKilled`, raise
+  `migrationJob.resources` (fleet-core LimitRange defaults unspecified pods to 512Mi).
