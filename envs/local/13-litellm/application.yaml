@@ -16,8 +16,9 @@ spec:
   sources:
     - repoURL: ghcr.io/berriai
       chart: litellm-helm
-      # Pin when you settle on a version; check upstream chart releases
-      targetRevision: 0.4.1
+      # Chart versions track LiteLLM releases (1.x), not an internal 0.x series.
+      # 0.4.1 does not exist on GHCR — that is why fleet-litellm-local stayed Unknown.
+      targetRevision: 1.100.0
       helm:
         releaseName: litellm
         valueFiles:

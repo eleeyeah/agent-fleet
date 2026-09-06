@@ -22,14 +22,13 @@ persistence:
   size: 10Gi
   storageClass: local-path
 
-# Disable all bundled datastores — SQLite + in-memory instead
+# Disable all bundled datastores — SQLite + in-memory instead.
+# Chart 11.x uses `redis`; chart 12+ renamed it to `valkey`. We pin 11.0.1.
 postgresql:
   enabled: false
 postgresql-ha:
   enabled: false
-valkey-cluster:
-  enabled: false
-valkey:
+redis:
   enabled: false
 
 gitea:

@@ -90,7 +90,8 @@ ensure_secret fleet-agents gitea-webhook-secret --from-literal=secret="$WEBHOOK_
 # with the litellm/agent_fleet users from its values.yaml)
 copy_pg_credentials() { # pg_user target_ns target_name db_name
   local pg_user="$1" tns="$2" tname="$3" db="$4"
-  local src="${pg_user}.${PG_SVC}.credentials.postgresql.acid.zalan.do"
+  # Zalando normalizes underscores to hyphens in secret names (agent_fleet -> agent-fleet)
+  local src="${pg_user//_/-}.${PG_SVC}.credentials.postgresql.acid.zalan.do"
   kubectl get secret -n "$PG_NS" "$src" >/dev/null 2>&1 \
     || die "Patroni secret $PG_NS/$src not found — sync patroni-postgres-ha first (it now declares the '$pg_user' user)"
   local user pass
@@ -113,11 +114,21 @@ copy_pg_credentials agent_fleet fleet-agents agent-checkpoint-db agentstate
 log "applying Argo CD root app"
 kubectl apply -f "$ROOT_DIR/argocd/root-app.yaml"
 
-log "waiting for Gitea rollout (up to 10m — first sync pulls images)"
-kubectl rollout status -n fleet-git deploy/gitea --timeout=600s \
-  || die "Gitea did not become ready; check Argo CD"
-log "waiting for LiteLLM rollout (up to 10m)"
-kubectl rollout status -n fleet-core deploy/litellm --timeout=600s \
+wait_for_deploy() { # ns name timeout_s
+  local ns="$1" name="$2" timeout="$3" i
+  log "waiting for deploy/${name} in ${ns} (up to ${timeout}s — Argo CD must sync first)"
+  for ((i=0; i<timeout; i+=10)); do
+    if kubectl get deploy -n "$ns" "$name" >/dev/null 2>&1; then
+      kubectl rollout status -n "$ns" "deploy/${name}" --timeout="${timeout}s" && return 0
+    fi
+    sleep 10
+  done
+  return 1
+}
+
+wait_for_deploy fleet-git gitea 600 \
+  || die "Gitea did not become ready. In Argo CD, open fleet-gitea-local and read ComparisonError."
+wait_for_deploy fleet-core litellm 600 \
   || warn "LiteLLM not ready yet — virtual key step may fail; re-run bootstrap after it settles"
 
 # ------------------------------------------------------------- 4. Gitea setup

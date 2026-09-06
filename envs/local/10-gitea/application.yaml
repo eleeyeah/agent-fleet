@@ -15,8 +15,10 @@ spec:
   sources:
     - repoURL: https://dl.gitea.com/charts/
       chart: gitea
-      # Pin when you settle on a version; check upstream chart releases
-      targetRevision: 12.4.0
+      # 11.x is the last series that still ships the act-runner subchart.
+      # Chart 12+ moved Actions to a separate unpublished helm-actions chart
+      # and fails render if `actions:` is present (that is why bootstrap stalled).
+      targetRevision: 11.0.1
       helm:
         releaseName: gitea
         valueFiles:
