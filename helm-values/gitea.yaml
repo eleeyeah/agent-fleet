@@ -30,6 +30,9 @@ postgresql-ha:
   enabled: false
 redis:
   enabled: false
+# Chart 11 defaults this ON (3 extra Redis pods + PVCs). We use in-memory cache.
+redis-cluster:
+  enabled: false
 
 gitea:
   # Created by scripts/bootstrap.sh BEFORE first sync (keys: username, password, email)
