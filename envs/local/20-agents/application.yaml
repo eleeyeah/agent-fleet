@@ -1,0 +1,32 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: fleet-agents-local
+  namespace: argocd
+  annotations:
+    # Wave 3: everything else must be up; images must exist in the Gitea registry
+    # (scripts/build-images.sh) and bootstrap.sh must have created the secrets.
+    argocd.argoproj.io/sync-wave: "3"
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io/background
+spec:
+  project: agent-fleet
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: fleet-agents
+  source:
+    repoURL: git@github.com:eleeyeah/agent-fleet.git
+    targetRevision: HEAD
+    path: manifests/agents
+    directory:
+      recurse: true
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+      allowEmpty: false
+    syncOptions:
+      - Validate=true
+      - CreateNamespace=true
+      - PrunePropagationPolicy=foreground
+      - PruneLast=true

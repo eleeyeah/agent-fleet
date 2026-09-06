@@ -1,0 +1,71 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: backend-dev-agent
+  namespace: fleet-agents
+  labels:
+    app: backend-dev-agent
+spec:
+  # Phase 1: one dev, one task at a time. Phase 2: KEDA scales this on queue depth
+  # (tasks are single-consumer work-queue messages, so replicas never collide).
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app: backend-dev-agent
+  template:
+    metadata:
+      labels:
+        app: backend-dev-agent
+    spec:
+      serviceAccountName: backend-dev-agent
+      automountServiceAccountToken: false
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: dev
+          image: 192.168.178.20:30300/agents/fleet-backend-dev:0.1.0
+          envFrom:
+            - configMapRef:
+                name: fleet-config
+          env:
+            - name: FLEET_AGENT_NAME
+              value: backend-dev-agent
+            - name: FLEET_LITELLM_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: backend-dev-agent-litellm-key
+                  key: api_key
+            - name: FLEET_GITEA_USER
+              valueFrom:
+                secretKeyRef:
+                  name: dev-bot-token
+                  key: username
+            - name: FLEET_GITEA_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: dev-bot-token
+                  key: token
+          volumeMounts:
+            # Isolated, ephemeral workspaces — one subdir per task attempt (risk #3)
+            - name: work
+              mountPath: /work
+          resources:
+            requests:
+              cpu: 250m
+              memory: 512Mi
+            limits:
+              cpu: "1"
+              memory: 2Gi
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop: [ALL]
+      volumes:
+        - name: work
+          emptyDir:
+            sizeLimit: 2Gi

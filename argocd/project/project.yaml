@@ -1,0 +1,34 @@
+apiVersion: argoproj.io/v1alpha1
+kind: AppProject
+metadata:
+  name: agent-fleet
+  namespace: argocd
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io/background
+spec:
+  description: LLM agent fleet (PM + developer + reviewer) — local kubeadm
+  sourceRepos:
+    - git@github.com:eleeyeah/agent-fleet.git
+    # Upstream Helm repos
+    - https://dl.gitea.com/charts/
+    - https://nats-io.github.io/k8s/helm/charts/
+    # LiteLLM chart is OCI-hosted
+    - ghcr.io/berriai
+  destinations:
+    - namespace: fleet-git
+      server: https://kubernetes.default.svc
+    - namespace: fleet-core
+      server: https://kubernetes.default.svc
+    - namespace: fleet-agents
+      server: https://kubernetes.default.svc
+    - namespace: fleet-work
+      server: https://kubernetes.default.svc
+    - namespace: argocd
+      server: https://kubernetes.default.svc
+  clusterResourceWhitelist:
+    # Namespaces are cluster-scoped and managed by 00-security
+    - group: ""
+      kind: Namespace
+  namespaceResourceWhitelist:
+    - group: "*"
+      kind: "*"

@@ -1,0 +1,45 @@
+# NATS JetStream — single server, file-backed streams.
+# Streams/consumers/KV are created idempotently by the agents on startup
+# (fleet_common.bus.ensure_streams): TASKS (tasks.>), EVENTS (events.>), KV task-state.
+config:
+  cluster:
+    enabled: false
+  jetstream:
+    enabled: true
+    fileStore:
+      enabled: true
+      pvc:
+        enabled: true
+        size: 2Gi
+        storageClassName: local-path
+    memoryStore:
+      enabled: false
+
+container:
+  merge:
+    resources:
+      requests:
+        cpu: 100m
+        memory: 128Mi
+      limits:
+        cpu: 500m
+        memory: 512Mi
+
+# nats-box: in-cluster CLI pod; scripts/submit-project.sh execs into it
+natsBox:
+  enabled: true
+  container:
+    merge:
+      resources:
+        requests:
+          cpu: 10m
+          memory: 32Mi
+        limits:
+          cpu: 100m
+          memory: 64Mi
+
+# Single replica is fine for the homelab; JetStream file storage survives restarts
+statefulSet:
+  merge:
+    spec:
+      replicas: 1

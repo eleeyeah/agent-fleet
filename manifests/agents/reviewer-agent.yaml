@@ -1,0 +1,95 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: reviewer-agent
+  namespace: fleet-agents
+  labels:
+    app: reviewer-agent
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app: reviewer-agent
+  template:
+    metadata:
+      labels:
+        app: reviewer-agent
+    spec:
+      serviceAccountName: reviewer-agent
+      automountServiceAccountToken: false
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: reviewer
+          image: 192.168.178.20:30300/agents/fleet-reviewer:0.1.0
+          ports:
+            - containerPort: 8080
+              name: webhook
+          envFrom:
+            - configMapRef:
+                name: fleet-config
+          env:
+            - name: FLEET_AGENT_NAME
+              value: reviewer-agent
+            - name: FLEET_LITELLM_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: reviewer-agent-litellm-key
+                  key: api_key
+            - name: FLEET_GITEA_USER
+              valueFrom:
+                secretKeyRef:
+                  name: review-bot-token
+                  key: username
+            - name: FLEET_GITEA_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: review-bot-token
+                  key: token
+            - name: FLEET_WEBHOOK_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: gitea-webhook-secret
+                  key: secret
+          readinessProbe:
+            httpGet:
+              path: /healthz
+              port: 8080
+            initialDelaySeconds: 5
+          livenessProbe:
+            httpGet:
+              path: /healthz
+              port: 8080
+            initialDelaySeconds: 15
+            periodSeconds: 30
+          resources:
+            requests:
+              cpu: 100m
+              memory: 256Mi
+            limits:
+              cpu: 500m
+              memory: 512Mi
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop: [ALL]
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: reviewer-agent
+  namespace: fleet-agents
+  labels:
+    app: reviewer-agent
+spec:
+  selector:
+    app: reviewer-agent
+  ports:
+    - port: 8080
+      targetPort: 8080
+      name: webhook

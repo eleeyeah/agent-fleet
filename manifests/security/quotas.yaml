@@ -1,0 +1,114 @@
+# Resource ceilings per namespace — the cluster runs on laptop-class nodes (risk #8).
+# LimitRange gives every container sane defaults so a missing `resources:` block
+# can never take down a node.
+apiVersion: v1
+kind: ResourceQuota
+metadata:
+  name: fleet-agents-quota
+  namespace: fleet-agents
+spec:
+  hard:
+    requests.cpu: "2"
+    requests.memory: 4Gi
+    limits.cpu: "4"
+    limits.memory: 6Gi
+    pods: "10"
+---
+apiVersion: v1
+kind: LimitRange
+metadata:
+  name: fleet-agents-defaults
+  namespace: fleet-agents
+spec:
+  limits:
+    - type: Container
+      default:
+        cpu: 500m
+        memory: 1Gi
+      defaultRequest:
+        cpu: 100m
+        memory: 256Mi
+---
+apiVersion: v1
+kind: ResourceQuota
+metadata:
+  name: fleet-core-quota
+  namespace: fleet-core
+spec:
+  hard:
+    requests.cpu: "2"
+    requests.memory: 3Gi
+    limits.cpu: "3"
+    limits.memory: 4Gi
+    pods: "12"
+---
+apiVersion: v1
+kind: LimitRange
+metadata:
+  name: fleet-core-defaults
+  namespace: fleet-core
+spec:
+  limits:
+    - type: Container
+      default:
+        cpu: 500m
+        memory: 512Mi
+      defaultRequest:
+        cpu: 100m
+        memory: 128Mi
+---
+apiVersion: v1
+kind: ResourceQuota
+metadata:
+  name: fleet-git-quota
+  namespace: fleet-git
+spec:
+  hard:
+    requests.cpu: "1500m"
+    requests.memory: 2Gi
+    limits.cpu: "3"
+    limits.memory: 3Gi
+    pods: "8"
+---
+apiVersion: v1
+kind: LimitRange
+metadata:
+  name: fleet-git-defaults
+  namespace: fleet-git
+spec:
+  limits:
+    - type: Container
+      default:
+        cpu: 500m
+        memory: 512Mi
+      defaultRequest:
+        cpu: 100m
+        memory: 128Mi
+---
+apiVersion: v1
+kind: ResourceQuota
+metadata:
+  name: fleet-work-quota
+  namespace: fleet-work
+spec:
+  hard:
+    requests.cpu: "1"
+    requests.memory: 2Gi
+    limits.cpu: "2"
+    limits.memory: 3Gi
+    pods: "6"
+---
+apiVersion: v1
+kind: LimitRange
+metadata:
+  name: fleet-work-defaults
+  namespace: fleet-work
+spec:
+  limits:
+    - type: Container
+      default:
+        cpu: 500m
+        memory: 512Mi
+      defaultRequest:
+        cpu: 100m
+        memory: 128Mi

@@ -1,0 +1,116 @@
+# Network posture for fleet-agents (risks #4, #5):
+#   default-deny everything, then allow exactly four egress paths —
+#   DNS, NATS (fleet-core), LiteLLM (fleet-core), Gitea (fleet-git).
+# Agents have NO direct internet egress: the Anthropic key lives only in the
+# LiteLLM pod, and an agent that "decides" to call an external API simply can't.
+# NOTE: requires a CNI that enforces NetworkPolicy. Flannel does NOT — see
+# docs/RUNBOOK.md "NetworkPolicy enforcement" for adding Calico/Cilium.
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: default-deny-all
+  namespace: fleet-agents
+spec:
+  podSelector: {}
+  policyTypes: [Ingress, Egress]
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-dns
+  namespace: fleet-agents
+spec:
+  podSelector: {}
+  policyTypes: [Egress]
+  egress:
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: kube-system
+      ports:
+        - protocol: UDP
+          port: 53
+        - protocol: TCP
+          port: 53
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-egress-fleet-core
+  namespace: fleet-agents
+spec:
+  podSelector: {}
+  policyTypes: [Egress]
+  egress:
+    # NATS client port
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: fleet-core
+      ports:
+        - protocol: TCP
+          port: 4222
+    # LiteLLM gateway
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: fleet-core
+      ports:
+        - protocol: TCP
+          port: 4000
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-egress-fleet-git
+  namespace: fleet-agents
+spec:
+  podSelector: {}
+  policyTypes: [Egress]
+  egress:
+    # Gitea HTTP (clone/push over http + REST API)
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: fleet-git
+      ports:
+        - protocol: TCP
+          port: 3000
+---
+# LangGraph checkpoints live in the Patroni cluster (postgres-ha namespace).
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-egress-postgres
+  namespace: fleet-agents
+spec:
+  podSelector: {}
+  policyTypes: [Egress]
+  egress:
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: postgres-ha
+      ports:
+        - protocol: TCP
+          port: 5432
+---
+# Only the reviewer receives inbound traffic: Gitea webhooks on 8080.
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-webhook-from-gitea
+  namespace: fleet-agents
+spec:
+  podSelector:
+    matchLabels:
+      app: reviewer-agent
+  policyTypes: [Ingress]
+  ingress:
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: fleet-git
+      ports:
+        - protocol: TCP
+          port: 8080

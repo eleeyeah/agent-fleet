@@ -1,0 +1,24 @@
+# Seeded into every project repo by the template (the automated merge gate, risk #7).
+# Branch protection requires this check green before merge; verify the exact status
+# context string Gitea reports ("ci / test") and adjust protect_main() if it differs.
+name: ci
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install
+        run: |
+          if [ -f pyproject.toml ]; then pip install -e ".[dev]" 2>/dev/null || pip install -e .; fi
+          if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+          pip install pytest
+      - name: Test
+        run: pytest -q

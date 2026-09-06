@@ -1,0 +1,92 @@
+# Gitea — single replica, SQLite, laptop-friendly.
+# Deliberate tradeoffs for the homelab (documented in docs/ARCHITECTURE.md):
+#   - SQLite instead of Postgres: 1 replica, small fleet, zero extra services.
+#   - HTTP only inside the cluster; NodePort 30300 exposes UI + OCI registry to the LAN
+#     (containerd on each node needs the insecure-registry config, see docs/RUNBOOK.md).
+replicaCount: 1
+
+strategy:
+  type: Recreate
+
+service:
+  http:
+    type: NodePort
+    port: 3000
+    nodePort: 30300
+  ssh:
+    type: ClusterIP
+    port: 22
+
+persistence:
+  enabled: true
+  size: 10Gi
+  storageClass: local-path
+
+# Disable all bundled datastores — SQLite + in-memory instead
+postgresql:
+  enabled: false
+postgresql-ha:
+  enabled: false
+valkey-cluster:
+  enabled: false
+valkey:
+  enabled: false
+
+gitea:
+  # Created by scripts/bootstrap.sh BEFORE first sync (keys: username, password, email)
+  admin:
+    existingSecret: gitea-admin-secret
+  config:
+    database:
+      DB_TYPE: sqlite3
+    session:
+      PROVIDER: memory
+    cache:
+      ADAPTER: memory
+    queue:
+      TYPE: level
+    server:
+      # In-cluster service DNS; agents clone over HTTP with bot tokens
+      DOMAIN: gitea-http.fleet-git.svc.cluster.local
+      ROOT_URL: http://gitea-http.fleet-git.svc.cluster.local:3000/
+      DISABLE_SSH: true
+    repository:
+      DEFAULT_BRANCH: main
+    packages:
+      # OCI registry for agent images
+      ENABLED: true
+    actions:
+      # CI gate for every project repo
+      ENABLED: true
+    webhook:
+      # Gitea blocks webhooks to private addresses by default; the reviewer agent
+      # listens on a cluster IP, so allow private targets explicitly.
+      ALLOWED_HOST_LIST: private
+    service:
+      DISABLE_REGISTRATION: true
+
+# Act runner for Gitea Actions (the automated merge gate)
+actions:
+  enabled: true
+  provisioning:
+    enabled: true
+  statefulset:
+    resources:
+      requests:
+        cpu: 100m
+        memory: 256Mi
+      limits:
+        cpu: "1"
+        memory: 1Gi
+
+resources:
+  requests:
+    cpu: 100m
+    memory: 256Mi
+  limits:
+    cpu: "1"
+    memory: 1Gi
+
+# Chart-level test pod off (quota friendliness)
+test:
+  enabled: false

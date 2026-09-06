@@ -1,0 +1,67 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: pm-agent
+  namespace: fleet-agents
+  labels:
+    app: pm-agent
+spec:
+  # Exactly one PM: it is the single writer of task state transitions.
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app: pm-agent
+  template:
+    metadata:
+      labels:
+        app: pm-agent
+    spec:
+      serviceAccountName: pm-agent
+      automountServiceAccountToken: false
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: pm
+          image: 192.168.178.20:30300/agents/fleet-pm:0.1.0
+          envFrom:
+            - configMapRef:
+                name: fleet-config
+          env:
+            - name: FLEET_AGENT_NAME
+              value: pm-agent
+            - name: FLEET_LITELLM_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: pm-agent-litellm-key
+                  key: api_key
+            - name: FLEET_GITEA_USER
+              valueFrom:
+                secretKeyRef:
+                  name: pm-bot-token
+                  key: username
+            - name: FLEET_GITEA_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: pm-bot-token
+                  key: token
+            - name: FLEET_CHECKPOINT_DB_URI
+              valueFrom:
+                secretKeyRef:
+                  name: agent-checkpoint-db
+                  key: uri
+          resources:
+            requests:
+              cpu: 100m
+              memory: 256Mi
+            limits:
+              cpu: 500m
+              memory: 512Mi
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop: [ALL]

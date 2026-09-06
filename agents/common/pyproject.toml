@@ -1,0 +1,16 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "fleet-common"
+version = "0.1.0"
+description = "Shared runtime for the agent fleet: task schema, NATS bus, Gitea client, LLM wrapper, tracing"
+requires-python = ">=3.12"
+# Runtime dependencies are pinned once in agents/base/requirements.txt so every
+# agent image shares the exact same versions.
+dependencies = []
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["fleet_common*"]

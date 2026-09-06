@@ -1,0 +1,36 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: fleet-gitea-local
+  namespace: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: "1"
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io/background
+spec:
+  project: agent-fleet
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: fleet-git
+  sources:
+    - repoURL: https://dl.gitea.com/charts/
+      chart: gitea
+      # Pin when you settle on a version; check upstream chart releases
+      targetRevision: 12.4.0
+      helm:
+        releaseName: gitea
+        valueFiles:
+          - $values/helm-values/gitea.yaml
+    - repoURL: git@github.com:eleeyeah/agent-fleet.git
+      targetRevision: HEAD
+      ref: values
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+      allowEmpty: false
+    syncOptions:
+      - Validate=true
+      - CreateNamespace=true
+      - PrunePropagationPolicy=foreground
+      - PruneLast=true

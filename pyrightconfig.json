@@ -1,0 +1,13 @@
+{
+  "pythonVersion": "3.12",
+  "pythonPlatform": "Linux",
+  "include": ["agents"],
+  "exclude": [".venv", "**/__pycache__", "**/.pytest_cache", "**/*.egg-info"],
+  "extraPaths": [
+    "agents/common",
+    "agents/backend-dev/app",
+    "agents/pm/app",
+    "agents/reviewer/app",
+    "/tmp/fleet-deps"
+  ]
+}

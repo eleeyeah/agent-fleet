@@ -1,0 +1,35 @@
+# Fleet namespaces. Labels drive NetworkPolicy namespaceSelectors and PSS enforcement.
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: fleet-git
+  labels:
+    fleet.io/tier: git
+    pod-security.kubernetes.io/enforce: baseline
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: fleet-core
+  labels:
+    fleet.io/tier: core
+    pod-security.kubernetes.io/enforce: baseline
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: fleet-agents
+  labels:
+    fleet.io/tier: agents
+    # Agents run untrusted-ish LLM-driven code: restricted PSS (non-root,
+    # no privilege escalation, seccomp RuntimeDefault) — risk #4.
+    pod-security.kubernetes.io/enforce: restricted
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: fleet-work
+  labels:
+    fleet.io/tier: work
+    # Phase 2: sandboxed task/CI pods land here. Restricted from day one.
+    pod-security.kubernetes.io/enforce: restricted

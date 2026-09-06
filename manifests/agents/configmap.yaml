@@ -1,0 +1,23 @@
+# Non-secret fleet configuration shared by all agents.
+# Secrets (virtual keys, bot tokens, webhook secret, checkpoint db uri) are created
+# by scripts/bootstrap.sh and referenced by name in the Deployments — never in git.
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: fleet-config
+  namespace: fleet-agents
+data:
+  FLEET_NATS_URL: nats://nats.fleet-core.svc.cluster.local:4222
+  FLEET_LITELLM_BASE_URL: http://litellm.fleet-core.svc.cluster.local:4000
+  FLEET_GITEA_URL: http://gitea-http.fleet-git.svc.cluster.local:3000
+  FLEET_GITEA_ORG: agents
+  FLEET_TEMPLATE_REPO: project-template
+  FLEET_MODEL: claude-sonnet
+  FLEET_SMALL_MODEL: claude-haiku
+  FLEET_MAX_ITERATIONS: "40"
+  FLEET_MAX_TASK_ATTEMPTS: "2"
+  FLEET_MAX_PROJECT_TASKS: "8"
+  FLEET_COMMAND_TIMEOUT_S: "300"
+  FLEET_WORK_DIR: /work
+  # Set to an OTLP/HTTP endpoint to enable tracing (e.g. a collector in fleet-core)
+  FLEET_OTEL_ENDPOINT: ""

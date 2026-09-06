@@ -1,0 +1,30 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: fleet-redis-local
+  namespace: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: "1"
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io/background
+spec:
+  project: agent-fleet
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: fleet-core
+  source:
+    repoURL: git@github.com:eleeyeah/agent-fleet.git
+    targetRevision: HEAD
+    path: manifests/redis
+    directory:
+      recurse: true
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+      allowEmpty: false
+    syncOptions:
+      - Validate=true
+      - CreateNamespace=true
+      - PrunePropagationPolicy=foreground
+      - PruneLast=true

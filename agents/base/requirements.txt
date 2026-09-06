@@ -1,0 +1,16 @@
+# Shared, pinned dependency set for every agent image.
+# Bump deliberately; agents inherit these exact versions from the base image.
+langgraph==0.2.76
+langgraph-checkpoint-postgres==2.0.15
+langchain-openai==0.3.11
+langchain-core==0.3.49
+psycopg[binary]==3.2.6
+nats-py==2.9.0
+httpx==0.28.1
+pydantic==2.10.6
+pydantic-settings==2.8.1
+fastapi==0.115.12
+uvicorn==0.34.0
+opentelemetry-api==1.31.1
+opentelemetry-sdk==1.31.1
+opentelemetry-exporter-otlp-proto-http==1.31.1
