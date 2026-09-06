@@ -74,11 +74,11 @@ service:
 
 resources:
   requests:
-    cpu: 100m
-    memory: 256Mi
-  limits:
-    cpu: "1"
+    cpu: 200m
     memory: 1Gi
+  limits:
+    cpu: "2"
+    memory: 2Gi
 
 migrationJob:
   enabled: true
