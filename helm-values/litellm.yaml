@@ -82,3 +82,12 @@ resources:
 
 migrationJob:
   enabled: true
+  # LimitRange in fleet-core defaults unspecified containers to 512Mi. Prisma
+  # inside the LiteLLM image OOMs at that size (the Job was OOMKilled).
+  resources:
+    requests:
+      cpu: 100m
+      memory: 512Mi
+    limits:
+      cpu: "1"
+      memory: 2Gi
