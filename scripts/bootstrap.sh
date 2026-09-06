@@ -94,18 +94,20 @@ copy_pg_credentials() { # pg_user target_ns target_name db_name
   local src="${pg_user//_/-}.${PG_SVC}.credentials.postgresql.acid.zalan.do"
   kubectl get secret -n "$PG_NS" "$src" >/dev/null 2>&1 \
     || die "Patroni secret $PG_NS/$src not found — sync patroni-postgres-ha first (it now declares the '$pg_user' user)"
-  local user pass
+  local user pass user_enc pass_enc uri
   user="$(secret_val "$PG_NS" "$src" username)"
   pass="$(secret_val "$PG_NS" "$src" password)"
-  if kubectl get secret -n "$tns" "$tname" >/dev/null 2>&1; then
-    log "secret $tns/$tname exists — keeping"
-  else
-    kubectl create secret generic -n "$tns" "$tname" \
-      --from-literal=username="$user" \
-      --from-literal=password="$pass" \
-      --from-literal=uri="postgresql://${user}:${pass}@${PG_SVC}.${PG_NS}.svc.cluster.local:5432/${db}"
-    log "created secret $tns/$tname"
-  fi
+  user_enc="$(python3 -c "import urllib.parse,sys; print(urllib.parse.quote(sys.argv[1], safe=''))" "$user")"
+  pass_enc="$(python3 -c "import urllib.parse,sys; print(urllib.parse.quote(sys.argv[1], safe=''))" "$pass")"
+  uri="postgresql://${user_enc}:${pass_enc}@${PG_SVC}.${PG_NS}.svc.cluster.local:5432/${db}?sslmode=disable"
+  # Always refresh: Zalando passwords often contain URL-special characters, and the
+  # first copy may have built a broken uri (LiteLLM migrations then crash-loop).
+  kubectl create secret generic -n "$tns" "$tname" \
+    --from-literal=username="$user" \
+    --from-literal=password="$pass" \
+    --from-literal=uri="$uri" \
+    --dry-run=client -o yaml | kubectl apply -f -
+  log "upserted secret $tns/$tname"
 }
 copy_pg_credentials litellm fleet-core litellm-db-credentials litellm
 copy_pg_credentials agent_fleet fleet-agents agent-checkpoint-db agentstate

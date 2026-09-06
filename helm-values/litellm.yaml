@@ -30,6 +30,17 @@ db:
     name: litellm-db-credentials
     usernameKey: username
     passwordKey: password
+  # Include port; chart default omits it. Password still comes from the secret
+  # via Kubernetes $(VAR) expansion — special characters are handled by `uri`.
+  url: postgresql://$(DATABASE_USERNAME):$(DATABASE_PASSWORD)@$(DATABASE_HOST):5432/$(DATABASE_NAME)?sslmode=disable
+
+# Last DATABASE_URL wins: use the pre-encoded uri from bootstrap (safe for @:/#).
+extraEnvVars:
+  - name: DATABASE_URL
+    valueFrom:
+      secretKeyRef:
+        name: litellm-db-credentials
+        key: uri
 
 proxy_config:
   model_list:
