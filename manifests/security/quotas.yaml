@@ -36,10 +36,11 @@ metadata:
   namespace: fleet-core
 spec:
   hard:
-    requests.cpu: "2"
-    requests.memory: 3Gi
-    limits.cpu: "3"
-    limits.memory: 4Gi
+    # LiteLLM proxy (2Gi) + migrations Job (2Gi) + NATS/Redis
+    requests.cpu: "4"
+    requests.memory: 6Gi
+    limits.cpu: "6"
+    limits.memory: 8Gi
     pods: "12"
 ---
 apiVersion: v1
