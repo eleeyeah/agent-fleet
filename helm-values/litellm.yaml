@@ -32,7 +32,9 @@ db:
     passwordKey: password
   # Include port; chart default omits it. Password still comes from the secret
   # via Kubernetes $(VAR) expansion — special characters are handled by `uri`.
-  url: postgresql://$(DATABASE_USERNAME):$(DATABASE_PASSWORD)@$(DATABASE_HOST):5432/$(DATABASE_NAME)?sslmode=disable
+  # Zalando rejects non-TLS (pg_hba hostnossl reject). Prisma reports that as P1010.
+  # require (not no-verify): the migrate CLI's schema engine times out on no-verify.
+  url: postgresql://$(DATABASE_USERNAME):$(DATABASE_PASSWORD)@$(DATABASE_HOST):5432/$(DATABASE_NAME)?sslmode=require
 
 # Last DATABASE_URL wins: use the pre-encoded uri from bootstrap (safe for @:/#).
 extraEnvVars:
@@ -80,8 +82,11 @@ resources:
     cpu: "2"
     memory: 2Gi
 
+# Schema was applied once (prisma migrate deploy against litellm_proxy_extras).
+# The Job's Prisma CLI still P1001s against Zalando TLS even with sslmode=require;
+# the proxy query engine is fine. Keep the Job off so Argo does not stay Degraded.
 migrationJob:
-  enabled: true
+  enabled: false
   # Do not use an Argo PreSync hook. A failed/deleted hook leaves the app
   # permanently "waiting for Job" and skips auto-sync. Run migrations as a
   # normal Job alongside the Deployment.

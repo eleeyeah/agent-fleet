@@ -36,10 +36,11 @@ metadata:
   namespace: fleet-core
 spec:
   hard:
-    # LiteLLM proxy (2Gi) + migrations Job (2Gi) + NATS/Redis
-    requests.cpu: "4"
+    # LiteLLM 2 CPU + rolling old replica + migrations Job 1 CPU + NATS/Redis.
+    # 6 CPU was enough at rest but blocked rollouts (FailedCreate on limits.cpu).
+    requests.cpu: "5"
     requests.memory: 6Gi
-    limits.cpu: "6"
+    limits.cpu: "8"
     limits.memory: 8Gi
     pods: "12"
 ---

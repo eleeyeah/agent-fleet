@@ -5,7 +5,9 @@ metadata:
   name: fleet-git
   labels:
     fleet.io/tier: git
-    pod-security.kubernetes.io/enforce: baseline
+    # Gitea Actions act-runner uses privileged docker-in-docker. That is the
+    # CI gate (risk #7), not agent code — agents stay restricted in fleet-agents.
+    pod-security.kubernetes.io/enforce: privileged
 ---
 apiVersion: v1
 kind: Namespace

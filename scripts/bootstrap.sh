@@ -88,7 +88,7 @@ ensure_secret fleet-agents gitea-webhook-secret --from-literal=secret="$WEBHOOK_
 
 # Patroni credentials (created by the Zalando operator once patroni-postgres-ha syncs
 # with the litellm/agent_fleet users from its values.yaml)
-copy_pg_credentials() { # pg_user target_ns target_name db_name
+copy_pg_credentials() { # pg_user target_ns target_name db_name [sslmode]
   local pg_user="$1" tns="$2" tname="$3" db="$4"
   # Zalando normalizes underscores to hyphens in secret names (agent_fleet -> agent-fleet)
   local src="${pg_user//_/-}.${PG_SVC}.credentials.postgresql.acid.zalan.do"
@@ -99,7 +99,17 @@ copy_pg_credentials() { # pg_user target_ns target_name db_name
   pass="$(secret_val "$PG_NS" "$src" password)"
   user_enc="$(python3 -c "import urllib.parse,sys; print(urllib.parse.quote(sys.argv[1], safe=''))" "$user")"
   pass_enc="$(python3 -c "import urllib.parse,sys; print(urllib.parse.quote(sys.argv[1], safe=''))" "$pass")"
-  uri="postgresql://${user_enc}:${pass_enc}@${PG_SVC}.${PG_NS}.svc.cluster.local:5432/${db}?sslmode=disable"
+  # Prisma (LiteLLM) often P1001s on the DNS name: it tries IPv6 first and
+  # times out. nc to the same Service works on IPv4. Pin the ClusterIP.
+  local pg_ip
+  pg_ip="$(kubectl get svc -n "$PG_NS" "$PG_SVC" -o jsonpath='{.spec.clusterIP}')"
+  [[ -n "$pg_ip" ]] || die "could not resolve ClusterIP for ${PG_NS}/${PG_SVC}"
+  # Zalando/Spilo pg_hba rejects hostnossl ("no encryption"). Prisma maps that
+  # 28000 to P1010 ("denied access on <db>.public"), which looks like a GRANT
+  # problem. Use sslmode=require (libpq + Prisma schema engine). Prisma's
+  # no-verify works in the query engine but the migrate CLI times out (P1001).
+  local sslmode="${5:-require}"
+  uri="postgresql://${user_enc}:${pass_enc}@${pg_ip}:5432/${db}?sslmode=${sslmode}&connect_timeout=30"
   # Always refresh: Zalando passwords often contain URL-special characters, and the
   # first copy may have built a broken uri (LiteLLM migrations then crash-loop).
   kubectl create secret generic -n "$tns" "$tname" \
@@ -109,8 +119,8 @@ copy_pg_credentials() { # pg_user target_ns target_name db_name
     --dry-run=client -o yaml | kubectl apply -f -
   log "upserted secret $tns/$tname"
 }
-copy_pg_credentials litellm fleet-core litellm-db-credentials litellm
-copy_pg_credentials agent_fleet fleet-agents agent-checkpoint-db agentstate
+copy_pg_credentials litellm fleet-core litellm-db-credentials litellm require
+copy_pg_credentials agent_fleet fleet-agents agent-checkpoint-db agentstate require
 
 # --------------------------------------------------- 3. root app + wait for core
 log "applying Argo CD root app"

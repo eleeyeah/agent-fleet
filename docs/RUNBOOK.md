@@ -50,8 +50,20 @@
 
    Ensure `config_path = "/etc/containerd/certs.d"` is set in `/etc/containerd/config.toml`
    under `[plugins."io.containerd.grpc.v1.cri".registry]`, then `sudo systemctl restart containerd`.
+   `hosts.toml` alone is ignored while `config_path` is empty.
 
-4. `./scripts/bootstrap.sh` -> `./scripts/build-images.sh` -> Argo CD syncs wave 3.
+   Docker on the build machine must also allow HTTP, or `build-images.sh` fails with
+   `http: server gave HTTP response to HTTPS client`:
+
+   ```bash
+   # /etc/docker/daemon.json
+   { "insecure-registries": ["192.168.178.20:30300"] }
+   sudo systemctl restart docker
+   ```
+
+4. `./scripts/bootstrap.sh` -> `./scripts/trust-gitea-registry.sh` (sudo on
+   this node + tmkns-2 + tmkns-3) -> `./scripts/build-images.sh` -> Argo CD
+   syncs wave 3.
 
 ## Watching a project
 
@@ -132,6 +144,16 @@ After the first PR, check the exact status-check context Gitea reports on the PR
   in the registry yet (`./scripts/build-images.sh`) or containerd trust isn't configured.
 - `bootstrap.sh` is idempotent: it skips anything that already exists; re-running it
   after a partial failure is the intended recovery path.
+- LiteLLM Prisma `P1001 Can't reach database` while `nc` to port 5432 works: Prisma
+  tried IPv6 on the DNS name. `bootstrap.sh` writes `DATABASE_URL` with the
+  Postgres Service ClusterIP (IPv4) and `connect_timeout=30`. Re-run bootstrap
+  to refresh `litellm-db-credentials` / `agent-checkpoint-db`.
+- LiteLLM Prisma `P1010 User was denied access on <db>.public` after GRANTs look
+  correct: check Postgres CSV logs for `pg_hba.conf rejects connection ... no
+  encryption`. Zalando/Spilo rejects `sslmode=disable`. The URI must use
+  `sslmode=require` (Prisma migrate CLI + libpq). Do not use `sslmode=disable`.
+  Re-run bootstrap to refresh the secret, then restart `deploy/litellm` and
+  delete `job/litellm-migrations` so Argo recreates it.
 - LiteLLM migrations are a normal Job (`migrationJob.hooks.argocd.enabled: false`).
   Do not make them a PreSync hook: a failed/deleted hook leaves the app stuck on
   "waiting for completion of hook" and Argo skips auto-sync. If that happens:
