@@ -19,6 +19,8 @@ spec:
     spec:
       serviceAccountName: reviewer-agent
       automountServiceAccountToken: false
+      imagePullSecrets:
+        - name: gitea-registry
       securityContext:
         runAsNonRoot: true
         runAsUser: 1000

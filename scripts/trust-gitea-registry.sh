@@ -62,10 +62,11 @@ sudo bash -c "$(declare -f set_cri_config_path write_hosts_toml); REGISTRY='$REG
 sudo systemctl restart containerd
 echo "containerd restarted on $(hostname)"
 
+# Workers need a TTY so remote sudo can prompt. The script is copied first
+# so sudo's password is read from the TTY, not from a heredoc on stdin.
 for h in "${WORKERS[@]}"; do
-  echo "==> $h: containerd"
-  ssh -o BatchMode=yes -o ConnectTimeout=10 "$h" \
-    "sudo bash -s" <<EOF
+  echo "==> $h: containerd (sudo password for ${h})"
+  ssh -o ConnectTimeout=10 "$h" "cat > /tmp/trust-gitea-registry-node.sh && chmod 700 /tmp/trust-gitea-registry-node.sh" <<EOF
 set -euo pipefail
 REGISTRY='$REGISTRY'
 $(declare -f set_cri_config_path write_hosts_toml)
@@ -73,7 +74,9 @@ set_cri_config_path
 write_hosts_toml
 systemctl restart containerd
 echo "containerd restarted on \$(hostname)"
+rm -f /tmp/trust-gitea-registry-node.sh
 EOF
+  ssh -t -o ConnectTimeout=10 "$h" sudo bash /tmp/trust-gitea-registry-node.sh
 done
 
 echo

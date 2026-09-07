@@ -48,9 +48,11 @@ gitea:
     queue:
       TYPE: level
     server:
-      # In-cluster service DNS; agents clone over HTTP with bot tokens
-      DOMAIN: gitea-http.fleet-git.svc.cluster.local
-      ROOT_URL: http://gitea-http.fleet-git.svc.cluster.local:3000/
+      # LAN NodePort — Docker and kubelet on the nodes cannot resolve
+      # *.svc.cluster.local, and Gitea advertises ROOT_URL as the OCI token realm.
+      # In-cluster agents still clone via FLEET_GITEA_URL (Service DNS).
+      DOMAIN: 192.168.178.20
+      ROOT_URL: http://192.168.178.20:30300/
       DISABLE_SSH: true
     repository:
       DEFAULT_BRANCH: main
