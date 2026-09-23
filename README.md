@@ -17,6 +17,7 @@ Risks: [docs/RISKS.md](docs/RISKS.md) ·
 Operations: [docs/RUNBOOK.md](docs/RUNBOOK.md) ·
 Phase gates: [docs/PHASES.md](docs/PHASES.md) ·
 Internship-success intent: [intent/internship-success-loop.md](intent/internship-success-loop.md) ·
+Implementation (Claude Code + Jev): [docs/IMPLEMENTATION_CLAUDE_CODE_JEV.md](docs/IMPLEMENTATION_CLAUDE_CODE_JEV.md) ·
 AI-native loop design: [docs/AI_NATIVE_SDLC.md](docs/AI_NATIVE_SDLC.md) ·
 Fleet retrospective: [docs/FLEET_RETROSPECTIVE.md](docs/FLEET_RETROSPECTIVE.md)
 

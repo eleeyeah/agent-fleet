@@ -131,17 +131,20 @@ intent.md ─► spec.md ─► plan.md ─► build+tests ─► PR+review ─�
 
 ---
 
-## Architecture options (pick by control vs ops cost)
+## Architecture (chosen): Claude Code + Jev
 
-| Option | When | Notes |
-|--------|------|-------|
-| **A. Claude Managed Agents** | Want Anthropic harness (sandbox, compaction, prompt cache, long sessions) with less custom loop code | Beta (`managed-agents-2026-04-01`); cloud or self-hosted environment; good for async professional runs |
-| **B. Messages API + thin harness** | Need full control, ZDR/HIPAA constraints, or custom ACI | Match what we have today via LiteLLM; own the loop, tools, caps |
-| **C. Hybrid** | Interactive plan on API; long unattended build on Managed Agents | Same artifact contract either way |
+**Locked for the internship-success track** — see [IMPLEMENTATION_CLAUDE_CODE_JEV.md](IMPLEMENTATION_CLAUDE_CODE_JEV.md).
 
-Recommendation for this org’s cloud cost goal: **B for v1** (reuse LiteLLM + budgets we already trust), design the **artifact contract and hooks** so Option A can replace the harness later without rewriting the SDLC.
+| Layer | Choice | Role |
+|-------|--------|------|
+| Generate / act | Claude Code | Explore, plan, edit, verify commands, PR draft |
+| Decide / gate | Jev (TypeSafe AI System One) | Choice / Score / Noul: route play, complexity, ambiguity, tool risk, loop detect, ready-for-PR |
+| Done signal | Deterministic verifier | Tests / lint / build exit codes — never Jev alone |
+| Human gate | Mentor / you | Plan accept on risky work; real PR approval |
 
-Retain Gitea/NATS only if we still need an overnight fleet SKU. For the professional loop, **git + CI + session runner** is enough; NATS is optional job glue, not the product.
+Earlier options (Managed Agents-only, Messages API thin harness, hybrid) remain **later** evolution paths. Daily path does **not** use always-on PM/Reviewer pods.
+
+Retain Gitea/NATS only as the overnight fleet lab SKU. Personal loop needs git + Claude Code + Jev helper + CI.
 
 ---
 

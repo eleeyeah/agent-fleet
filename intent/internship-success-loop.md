@@ -102,11 +102,16 @@ Sanitized phase shape for loop design. Benchmarks are **personal practice target
 
 ## Open questions
 
-1. First runtime shape: Claude Code + templates only, vs thin local harness wrapping Messages API / LiteLLM?
-2. Where do per-ticket `intent.md` / `plan.md` live day-to-day (personal notes repo vs branch in the work repo)?
-3. Which verifier commands will dominate early (unit tests, lint, integration) once the real stack is known?
-4. How much of the existing fleet (Gitea, NATS, reviewer pod) is kept as a lab vs retired for the personal loop?
+1. Where do per-ticket `intent.md` / `plan.md` live day-to-day (personal notes repo vs branch in the work repo)?
+2. Which verifier commands will dominate early (unit tests, lint, integration) once the real stack is known?
+3. Exact Jev confidence thresholds — measure on labelled personal tickets before trusting auto-approve paths.
+4. How much of the existing fleet (Gitea, NATS, reviewer pod) stays as a lab vs stays idle for daily work?
+
+## Implementation choice (locked)
+
+**Claude Code** = generate/act · **Jev (TypeSafe AI)** = typed decisions/gates.  
+Spec: [docs/IMPLEMENTATION_CLAUDE_CODE_JEV.md](../docs/IMPLEMENTATION_CLAUDE_CODE_JEV.md)
 
 ## Next artifact
 
-When this intent is accepted: draft `spec.md` for the personal loop MVP (templates, checklist, optional thin runner) — still docs-first before platform work.
+When this intent is accepted: Phase I templates + `CLAUDE.md` skeleton per the implementation spec; then Phase II thin `jev_decide` helper.
