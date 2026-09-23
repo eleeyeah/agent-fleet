@@ -53,11 +53,13 @@ Gate (the proving run):
 - More roles (QA, frontend, docs); EKS lift (mirror `envs/eks/` like patroni);
   Bedrock as LiteLLM fallback provider; multi-project concurrency tuning.
 
-## Parallel track — AI-native professional loop (short cycle)
+## Parallel track — Internship-success / AI-native personal loop
 
-Evolve toward Anthropic’s AI-native SDLC rather than growing more always-on roles.
-Design and guidelines: [AI_NATIVE_SDLC.md](AI_NATIVE_SDLC.md) — artifact-gated
-stages (`intent` → `spec` → `plan` → build/verify → PR), explore→plan→implement,
-hooks/`CLAUDE.md` governance, hard budgets, human attention at gates. Keep fleet
-gates (LiteLLM, CI, human merge); shrink always-on PM/Reviewer pods into on-demand
-workflows and optional review subagents.
+Primary intent: [intent/internship-success-loop.md](../intent/internship-success-loop.md).  
+Design: [AI_NATIVE_SDLC.md](AI_NATIVE_SDLC.md).  
+What the todo-api fleet run did and did not prove: [FLEET_RETROSPECTIVE.md](FLEET_RETROSPECTIVE.md).
+
+Artifact-gated short cycle (`intent` → `spec` → `plan` → build/verify → self-review → PR),
+single-agent default, hard budgets, human mentor as the real review gate. Keep fleet
+gates (LiteLLM, CI, human merge) as lab lessons; do not treat always-on PM/Reviewer
+pods or Phase 2/3 role scale-out as the internship daily path.

@@ -16,7 +16,9 @@ Start here: [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) ·
 Risks: [docs/RISKS.md](docs/RISKS.md) ·
 Operations: [docs/RUNBOOK.md](docs/RUNBOOK.md) ·
 Phase gates: [docs/PHASES.md](docs/PHASES.md) ·
-AI-native professional loop: [docs/AI_NATIVE_SDLC.md](docs/AI_NATIVE_SDLC.md)
+Internship-success intent: [intent/internship-success-loop.md](intent/internship-success-loop.md) ·
+AI-native loop design: [docs/AI_NATIVE_SDLC.md](docs/AI_NATIVE_SDLC.md) ·
+Fleet retrospective: [docs/FLEET_RETROSPECTIVE.md](docs/FLEET_RETROSPECTIVE.md)
 
 ## Layout
 
@@ -39,6 +41,8 @@ agent-fleet/
     common/               # fleet_common package: task schema, NATS, Gitea, LLM, tracing
     pm/  backend-dev/  reviewer/
     templates/            # CI workflow seeded into every project repo (merge gate)
+  docs/                   # architecture, risks, runbook, phases, AI-native SDLC, fleet retrospective
+  intent/                 # durable intake artifacts (internship-success loop)
   scripts/
     bootstrap.sh          # one-time: secrets, Gitea org/bots, LiteLLM virtual keys
     submit-project.sh     # publish a project brief to the fleet

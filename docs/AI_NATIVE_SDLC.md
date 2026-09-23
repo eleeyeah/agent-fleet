@@ -1,10 +1,18 @@
 # AI-Native Agentic Workflow — Professional Loop Design
 
 **Status:** research / design (not implemented)  
-**Scope:** a **professional** agentic software-delivery loop — Anthropic-native, short cycle, cloud-cost aware.  
-**Not in scope:** tutoring, classroom, or “learn to code” products.
+**Primary user:** personal professional harness for internship / early developer success
+(ticket → explore → plan → implement → verify → self-review → PR).  
+**Scope:** Anthropic-native, short-cycle, cloud-cost-aware agentic SDLC.  
+**Not in scope:** tutoring/classroom products; scaling the always-on PM/Dev/Reviewer fleet
+into an employer cloud as the daily tool.
 
-This note reframes how we should evolve (or replace) the current PM → Dev → Reviewer fleet so it matches Anthropic’s AI-native SDLC: an **artifact-gated loop**, not a permanent multi-role chat swarm.
+**Start here for product intent:** [intent/internship-success-loop.md](../intent/internship-success-loop.md)  
+**Fleet lab lessons:** [FLEET_RETROSPECTIVE.md](FLEET_RETROSPECTIVE.md)
+
+This note describes how the loop should work (Anthropic AI-native SDLC: an
+**artifact-gated loop**, not a permanent multi-role chat swarm) and how it relates to
+the existing fleet prototype.
 
 Primary sources:
 
@@ -235,6 +243,9 @@ If any answer is weak → do not add a pod, a queue, or a specialist LLM.
 | Pytest / CI as done | Add plan mode + `plan.md` gate | NATS as primary UX (keep as optional job bus) |
 | Human merge on `main` | Hooks for policy-as-code | More permanent roles before Build/Deploy metrics improve |
 | Correlation IDs / spend UI | Receipts tied to artifact SHAs | Unbounded iteration |
+
+**Product intent:** [intent/internship-success-loop.md](../intent/internship-success-loop.md)  
+**Lab lessons:** [FLEET_RETROSPECTIVE.md](FLEET_RETROSPECTIVE.md)
 
 ---
 

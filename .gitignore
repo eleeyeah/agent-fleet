@@ -6,3 +6,8 @@ __pycache__/
 .pytest_cache/
 .mypy_cache/
 .ruff_cache/
+
+# Confidential employer / internship materials — never commit
+**/Praktikumsplan*
+**/*_signed_*.pdf
+uploads/
