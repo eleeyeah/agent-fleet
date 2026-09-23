@@ -52,3 +52,15 @@ Gate (the proving run):
 
 - More roles (QA, frontend, docs); EKS lift (mirror `envs/eks/` like patroni);
   Bedrock as LiteLLM fallback provider; multi-project concurrency tuning.
+
+## Parallel track — Internship-success / AI-native personal loop
+
+Primary intent: [intent/internship-success-loop.md](../intent/internship-success-loop.md).  
+**Implementation:** Claude Code (act) + Jev / TypeSafe AI (decide) —
+[IMPLEMENTATION_CLAUDE_CODE_JEV.md](IMPLEMENTATION_CLAUDE_CODE_JEV.md).  
+Design: [AI_NATIVE_SDLC.md](AI_NATIVE_SDLC.md).  
+Fleet lab lessons: [FLEET_RETROSPECTIVE.md](FLEET_RETROSPECTIVE.md).
+
+Artifact-gated short cycle (`intent` → `plan` → build/verify → self-review → PR),
+Jev for routing/gates/loop-detect, deterministic tests as done, human mentor as the
+real review gate. Fleet pods stay a lab — not the internship daily path.
