@@ -18,6 +18,78 @@ Sources: [Building a harness with Jev](https://www.langchain.com/blog/building-a
 
 ---
 
+## Proposed harness (diagram)
+
+Three layers: **Claude Code acts**, **Jev decides**, **code verifies**. Humans sit only at gates.
+
+```mermaid
+flowchart TB
+  subgraph human [Human gates]
+    You[You: ticket plus intent.md]
+    PlanOK[You: accept or edit plan]
+    Mentor[Mentor: real PR review and merge]
+  end
+
+  subgraph jev [Jev - TypeSafe System One - decide]
+    Intake["Intake: play Choice / complexity Score / ambiguity Noul"]
+    HotPath["Hot path: tool_risk / is_looping / new_session"]
+    ExitGate["Exit: ready_for_PR Noul / escalate Noul"]
+  end
+
+  subgraph cc [Claude Code - generate and act]
+    Explore[Explore ask or plan mode]
+    Plan[Write plan.md]
+    Build[Implement plus tests]
+    SelfRev[Self-review vs plan]
+    OpenPR[Open PR with evidence]
+  end
+
+  subgraph det [Deterministic verifier - not an LLM]
+    Tests[pytest / lint / build exit codes]
+  end
+
+  You --> Intake
+  Intake -->|low ambiguity| Explore
+  Intake -->|high ambiguity| You
+  Explore --> Plan --> PlanOK
+  PlanOK --> Build
+  Build --> HotPath
+  HotPath -->|safe continue| Build
+  HotPath -->|block or loop| PlanOK
+  Build --> Tests --> ExitGate
+  ExitGate -->|not done| Build
+  ExitGate -->|escalate| PlanOK
+  ExitGate -->|ready| SelfRev --> OpenPR --> Mentor
+```
+
+### Layer view (same harness)
+
+```mermaid
+flowchart LR
+  subgraph L1 [1 Control plane]
+    JevNode[Jev typed decisions]
+  end
+  subgraph L2 [2 Actor]
+    CC[Claude Code session]
+  end
+  subgraph L3 [3 Ground truth]
+    V[Tests lint build]
+  end
+  subgraph L4 [4 Accountability]
+    H[Human mentor]
+  end
+
+  JevNode -->|route and gate| CC
+  CC -->|run checks| V
+  V -->|pass or fail evidence| JevNode
+  CC -->|PR| H
+  JevNode -->|escalate| H
+```
+
+**Read left-to-right daily path:** intent → Jev intake → Claude explore/plan → human plan gate (if needed) → Claude build ↔ Jev hot-path gates → deterministic tests → Jev exit → self-review → PR → mentor.
+
+---
+
 ## Responsibility split
 
 ```mermaid
