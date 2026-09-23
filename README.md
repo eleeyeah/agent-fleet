@@ -16,7 +16,7 @@ Start here: [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) ·
 Risks: [docs/RISKS.md](docs/RISKS.md) ·
 Operations: [docs/RUNBOOK.md](docs/RUNBOOK.md) ·
 Phase gates: [docs/PHASES.md](docs/PHASES.md) ·
-Future companion (cheaper loop): [docs/COMPANION_LOOP.md](docs/COMPANION_LOOP.md)
+AI-native professional loop: [docs/AI_NATIVE_SDLC.md](docs/AI_NATIVE_SDLC.md)
 
 ## Layout
 
