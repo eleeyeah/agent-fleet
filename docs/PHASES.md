@@ -52,3 +52,12 @@ Gate (the proving run):
 
 - More roles (QA, frontend, docs); EKS lift (mirror `envs/eks/` like patroni);
   Bedrock as LiteLLM fallback provider; multi-project concurrency tuning.
+
+## Parallel track — Learning companion (cost-first product)
+
+The fleet topology (PM + Dev + Reviewer always on) is expensive for an interactive
+learning / coding companion. Research and target architecture live in
+[COMPANION_LOOP.md](COMPANION_LOOP.md): single ReAct agent, mode-as-skills,
+Haiku routing, hard budgets, learner state — keep fleet gates, drop multi-agent
+default. Treat companion as a separate SKU/path; do not force learners through
+the Phase 1 DAG.
