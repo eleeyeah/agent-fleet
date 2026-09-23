@@ -56,10 +56,11 @@ Gate (the proving run):
 ## Parallel track — Internship-success / AI-native personal loop
 
 Primary intent: [intent/internship-success-loop.md](../intent/internship-success-loop.md).  
+**Implementation:** Claude Code (act) + Jev / TypeSafe AI (decide) —
+[IMPLEMENTATION_CLAUDE_CODE_JEV.md](IMPLEMENTATION_CLAUDE_CODE_JEV.md).  
 Design: [AI_NATIVE_SDLC.md](AI_NATIVE_SDLC.md).  
-What the todo-api fleet run did and did not prove: [FLEET_RETROSPECTIVE.md](FLEET_RETROSPECTIVE.md).
+Fleet lab lessons: [FLEET_RETROSPECTIVE.md](FLEET_RETROSPECTIVE.md).
 
-Artifact-gated short cycle (`intent` → `spec` → `plan` → build/verify → self-review → PR),
-single-agent default, hard budgets, human mentor as the real review gate. Keep fleet
-gates (LiteLLM, CI, human merge) as lab lessons; do not treat always-on PM/Reviewer
-pods or Phase 2/3 role scale-out as the internship daily path.
+Artifact-gated short cycle (`intent` → `plan` → build/verify → self-review → PR),
+Jev for routing/gates/loop-detect, deterministic tests as done, human mentor as the
+real review gate. Fleet pods stay a lab — not the internship daily path.
