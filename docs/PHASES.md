@@ -53,11 +53,11 @@ Gate (the proving run):
 - More roles (QA, frontend, docs); EKS lift (mirror `envs/eks/` like patroni);
   Bedrock as LiteLLM fallback provider; multi-project concurrency tuning.
 
-## Parallel track — Learning companion (cost-first product)
+## Parallel track — AI-native professional loop (short cycle)
 
-The fleet topology (PM + Dev + Reviewer always on) is expensive for an interactive
-learning / coding companion. Research and target architecture live in
-[COMPANION_LOOP.md](COMPANION_LOOP.md): single ReAct agent, mode-as-skills,
-Haiku routing, hard budgets, learner state — keep fleet gates, drop multi-agent
-default. Treat companion as a separate SKU/path; do not force learners through
-the Phase 1 DAG.
+Evolve toward Anthropic’s AI-native SDLC rather than growing more always-on roles.
+Design and guidelines: [AI_NATIVE_SDLC.md](AI_NATIVE_SDLC.md) — artifact-gated
+stages (`intent` → `spec` → `plan` → build/verify → PR), explore→plan→implement,
+hooks/`CLAUDE.md` governance, hard budgets, human attention at gates. Keep fleet
+gates (LiteLLM, CI, human merge); shrink always-on PM/Reviewer pods into on-demand
+workflows and optional review subagents.
